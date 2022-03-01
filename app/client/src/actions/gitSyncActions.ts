@@ -1,10 +1,10 @@
-import { ReduxActionTypes } from "constants/ReduxActionConstants";
-import { ConnectToGitPayload } from "api/GitSyncAPI";
 import {
-  ReduxActionWithCallbacks,
   ReduxActionErrorTypes,
+  ReduxActionTypes,
+  ReduxActionWithCallbacks,
 } from "constants/ReduxActionConstants";
-import { GitSyncModalTab, GitConfig, MergeStatus } from "entities/GitSync";
+import { ConnectToGitPayload } from "api/GitSyncAPI";
+import { GitConfig, GitSyncModalTab, MergeStatus } from "entities/GitSync";
 import { GitApplicationMetadata } from "api/ApplicationApi";
 import { GitStatusData } from "reducers/uiReducers/gitSyncReducer";
 import { ResponseMeta } from "../api/ApiResponses";
@@ -160,6 +160,20 @@ export const fetchGitStatusInit = () => ({
 export const fetchGitStatusSuccess = (payload: GitStatusData) => ({
   type: ReduxActionTypes.FETCH_GIT_STATUS_SUCCESS,
   payload,
+});
+
+export const discardChanges = () => ({
+  type: ReduxActionTypes.GIT_DISCARD_CHANGES,
+});
+
+export const discardChangesSuccess = (payload: any) => ({
+  type: ReduxActionTypes.GIT_DISCARD_CHANGES_SUCCESS,
+  payload,
+});
+
+export const discardChangesFailure = (payload: any) => ({
+  type: ReduxActionErrorTypes.GIT_DISCARD_CHANGES_ERROR,
+  payload: { error: payload.error, show: false },
 });
 
 export const updateBranchLocally = (payload: string) => ({

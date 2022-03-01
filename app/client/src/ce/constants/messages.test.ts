@@ -1,6 +1,8 @@
 import {
+  ARE_YOU_SURE,
   CANNOT_MERGE_DUE_TO_UNCOMMITTED_CHANGES,
   CANNOT_PULL_WITH_LOCAL_UNCOMMITTED_CHANGES,
+  CHANGES_MADE_SINCE_LAST_COMMIT,
   COMMIT_AND_PUSH,
   COMMIT_CHANGES,
   COMMIT_TO,
@@ -19,6 +21,10 @@ import {
   DEPLOY,
   DEPLOY_KEY_TITLE,
   DEPLOY_KEY_USAGE_GUIDE_MESSAGE,
+  DISCARD_CHANGES,
+  DISCARD_CHANGES_WARNING,
+  DISCARD_SUCCESS,
+  DISCARDING_AND_PULLING_CHANGES,
   DISCONNECT,
   DISCONNECT_CAUSE_APPLICATION_BREAK,
   DISCONNECT_EXISTING_REPOSITORIES,
@@ -113,7 +119,7 @@ describe("git-sync messages", () => {
     },
     {
       key: "REMOTE_URL_INPUT_PLACEHOLDER",
-      value: "git://example.com:user/repo.git",
+      value: "ssh://example.com:user/repo.git",
     },
     { key: "COPIED_SSH_KEY", value: "Copied SSH Key" },
     {
@@ -209,10 +215,36 @@ describe("git-sync messages", () => {
       value: `Create an empty git repository and paste the remote URL here.`,
     },
     { key: "REMOTE_URL_VIA", value: "Remote URL via" },
+    {
+      key: "CHANGES_MADE_SINCE_LAST_COMMIT",
+      value: "Changes made since last commit",
+    },
+    {
+      key: "DISCARD_CHANGES_WARNING",
+      value: "Discarding these changes will pull previous changes from Git.",
+    },
+    {
+      key: "DISCARD_SUCCESS",
+      value: "Discarded changes successfully.",
+    },
+    {
+      key: "DISCARDING_AND_PULLING_CHANGES",
+      value: "DISCARDING AND PULLING CHANGES...",
+    },
+    {
+      key: "ARE_YOU_SURE",
+      value: "Are you sure?",
+    },
+    {
+      key: "DISCARD_CHANGES",
+      value: "Discard changes",
+    },
   ];
   const functions = [
+    ARE_YOU_SURE,
     CANNOT_MERGE_DUE_TO_UNCOMMITTED_CHANGES,
     CANNOT_PULL_WITH_LOCAL_UNCOMMITTED_CHANGES,
+    CHANGES_MADE_SINCE_LAST_COMMIT,
     COMMITTING_AND_PUSHING_CHANGES,
     COMMIT_AND_PUSH,
     COMMIT_CHANGES,
@@ -230,6 +262,10 @@ describe("git-sync messages", () => {
     DEPLOY,
     DEPLOY_KEY_TITLE,
     DEPLOY_KEY_USAGE_GUIDE_MESSAGE,
+    DISCARDING_AND_PULLING_CHANGES,
+    DISCARD_CHANGES,
+    DISCARD_CHANGES_WARNING,
+    DISCARD_SUCCESS,
     DISCONNECT,
     DISCONNECT_CAUSE_APPLICATION_BREAK,
     DISCONNECT_EXISTING_REPOSITORIES,

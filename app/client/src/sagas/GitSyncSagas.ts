@@ -5,9 +5,12 @@ import {
   ReduxActionTypes,
   ReduxActionWithCallbacks,
 } from "constants/ReduxActionConstants";
-import { all, put, select, takeLatest, call } from "redux-saga/effects";
+import { all, call, put, select, takeLatest } from "redux-saga/effects";
 
-import GitSyncAPI from "api/GitSyncAPI";
+import GitSyncAPI, {
+  MergeBranchPayload,
+  MergeStatusPayload,
+} from "api/GitSyncAPI";
 import {
   getCurrentApplicationId,
   getCurrentPageId,
@@ -15,35 +18,39 @@ import {
 import { validateResponse } from "./ErrorSagas";
 import {
   commitToRepoSuccess,
+  discardChangesFailure,
+  discardChangesSuccess,
   fetchBranchesInit,
   fetchBranchesSuccess,
-  fetchGlobalGitConfigSuccess,
-  fetchLocalGitConfigSuccess,
-  updateLocalGitConfigSuccess,
-  fetchLocalGitConfigInit,
-  switchGitBranchInit,
-  gitPullSuccess,
-  fetchMergeStatusSuccess,
-  fetchMergeStatusFailure,
   fetchGitStatusInit,
-  setIsGitSyncModalOpen,
-  setIsGitErrorPopupVisible,
-  setIsDisconnectGitModalOpen,
-  setShowRepoLimitErrorModal,
+  fetchGitStatusSuccess,
   fetchGlobalGitConfigInit,
-  generateSSHKeyPairSuccess,
-  getSSHKeyPairSuccess,
-  getSSHKeyPairError,
+  fetchGlobalGitConfigSuccess,
+  fetchLocalGitConfigInit,
+  fetchLocalGitConfigSuccess,
+  fetchMergeStatusFailure,
+  fetchMergeStatusSuccess,
   GenerateSSHKeyPairReduxAction,
+  generateSSHKeyPairSuccess,
+  getSSHKeyPairError,
   GetSSHKeyPairReduxAction,
+  getSSHKeyPairSuccess,
+  gitPullSuccess,
   importAppViaGitSuccess,
+  setIsDisconnectGitModalOpen,
+  setIsGitErrorPopupVisible,
+  setIsGitSyncModalOpen,
+  setShowRepoLimitErrorModal,
+  switchGitBranchInit,
+  updateLocalGitConfigSuccess,
 } from "actions/gitSyncActions";
 
 import { showReconnectDatasourceModal } from "actions/applicationActions";
 
 import {
-  connectToGitSuccess,
   ConnectToGitReduxAction,
+  connectToGitSuccess,
+  mergeBranchSuccess,
 } from "../actions/gitSyncActions";
 import { ApiResponse } from "api/ApiResponses";
 import { GitConfig, GitSyncModalTab } from "entities/GitSync";
@@ -52,8 +59,8 @@ import { Variant } from "components/ads/common";
 import {
   getCurrentAppGitMetaData,
   getCurrentApplication,
+  getOrganizationIdForImport,
 } from "selectors/applicationSelectors";
-import { fetchGitStatusSuccess } from "actions/gitSyncActions";
 import {
   createMessage,
   GIT_USER_UPDATED_SUCCESSFULLY,
@@ -62,19 +69,12 @@ import { GitApplicationMetadata } from "../api/ApplicationApi";
 
 import history from "utils/history";
 import { addBranchParam, GIT_BRANCH_QUERY_KEY } from "constants/routes";
-import { MergeBranchPayload, MergeStatusPayload } from "api/GitSyncAPI";
-
-import {
-  mergeBranchSuccess,
-  // mergeBranchFailure,
-} from "../actions/gitSyncActions";
 import {
   getCurrentGitBranch,
   getDisconnectingGitApplication,
 } from "selectors/gitSyncSelectors";
 import { initEditor } from "actions/initActions";
 import { fetchPage } from "actions/pageActions";
-import { getOrganizationIdForImport } from "selectors/applicationSelectors";
 import { getLogToSentryFromResponse } from "utils/helpers";
 import { getCurrentOrg } from "selectors/organizationSelectors";
 import { Org } from "constants/orgConstants";
@@ -634,13 +634,11 @@ function* importAppFromGitSaga(action: ConnectToGitReduxAction) {
       action.payload,
       organizationIdForImport,
     );
-
     const isValidResponse: boolean = yield validateResponse(
       response,
       false,
       getLogToSentryFromResponse(response),
     );
-
     if (isValidResponse) {
       const allOrgs = yield select(getCurrentOrg);
       const currentOrg = allOrgs.filter(
@@ -775,6 +773,34 @@ export function* generateSSHKeyPairSaga(action: GenerateSSHKeyPairReduxAction) {
   }
 }
 
+function* discardChanges() {
+  let response: ApiResponse | undefined;
+  try {
+    const appId: string = yield select(getCurrentApplicationId);
+    const doPull = true;
+    response = yield GitSyncAPI.discardChanges(appId, doPull);
+    const isValidResponse: boolean = yield validateResponse(
+      response,
+      false,
+      getLogToSentryFromResponse(response),
+    );
+    if (isValidResponse) {
+      yield put(discardChangesSuccess(response?.data));
+      // yield fetchGitStatusSaga();
+      const applicationId: string = yield select(getCurrentApplicationId);
+      const pageId = yield select(getCurrentPageId);
+      localStorage.setItem("GIT_DISCARD_CHANGES", "success");
+      window.open(
+        builderURL({ applicationId: applicationId, pageId: pageId }),
+        "_self",
+      );
+    }
+  } catch (error) {
+    yield put(discardChangesFailure({ error }));
+    localStorage.setItem("GIT_DISCARD_CHANGES", "failure");
+  }
+}
+
 export default function* gitSyncSagas() {
   yield all([
     takeLatest(ReduxActionTypes.COMMIT_TO_GIT_REPO_INIT, commitToGitRepoSaga),
@@ -813,5 +839,6 @@ export default function* gitSyncSagas() {
       generateSSHKeyPairSaga,
     ),
     takeLatest(ReduxActionTypes.FETCH_SSH_KEY_PAIR_INIT, getSSHKeyPairSaga),
+    takeLatest(ReduxActionTypes.GIT_DISCARD_CHANGES, discardChanges),
   ]);
 }
