@@ -15,6 +15,8 @@ export const ReduxSagaChannels = {
 };
 
 export const ReduxActionTypes = {
+  GIT_DISCARD_CHANGES_SUCCESS: "GIT_DISCARD_CHANGES_SUCCESS",
+  GIT_DISCARD_CHANGES: "GIT_DISCARD_CHANGES",
   SHOW_RECONNECT_DATASOURCE_MODAL: "SHOW_RECONNECT_DATASOURCE_MODAL",
   RESET_UNCONCONFIGURED_DATASOURCES_LIST_DURING_IMPORT:
     "RESET_UNCONCONFIGURED_DATASOURCES_LIST_DURING_IMPORT",
@@ -697,6 +699,7 @@ export const ReduxActionTypes = {
 export type ReduxActionType = typeof ReduxActionTypes[keyof typeof ReduxActionTypes];
 
 export const ReduxActionErrorTypes = {
+  GIT_DISCARD_CHANGES_ERROR: "GIT_DISCARD_CHANGES_ERROR",
   GIT_PULL_ERROR: "GIT_PULL_ERROR",
   FETCH_MERGE_STATUS_ERROR: "FETCH_MERGE_STATUS_ERROR",
   MERGE_BRANCH_ERROR: "MERGE_BRANCH_ERROR",
@@ -925,6 +928,7 @@ export interface PromisePayload {
   reject: any;
   resolve: any;
 }
+
 export interface ReduxActionWithPromise<T> extends ReduxAction<T> {
   payload: T & PromisePayload;
 }
